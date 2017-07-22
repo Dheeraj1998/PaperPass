@@ -15,6 +15,8 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 public class RegisterActivity extends AppCompatActivity {
 
@@ -58,6 +60,8 @@ public class RegisterActivity extends AppCompatActivity {
             progressDialog.setCancelable(false);
             progressDialog.show();
 
+            final DatabaseReference myRootRef = FirebaseDatabase.getInstance().getReference("user_profile");
+
             mAuth.createUserWithEmailAndPassword(email, password)
                     .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                         @Override
@@ -73,6 +77,10 @@ public class RegisterActivity extends AppCompatActivity {
                             }
 
                             else{
+                                DatabaseReference user_email_ref =  myRootRef.child(mAuth.getCurrentUser().getUid());
+                                DatabaseReference user_name = user_email_ref.child("Name");
+                                user_name.setValue(name);
+
                                 progressDialog.dismiss();
 
                                 Intent temp = new Intent(RegisterActivity.this, LoginActivity.class);
