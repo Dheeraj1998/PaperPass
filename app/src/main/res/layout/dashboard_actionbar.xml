@@ -11,6 +11,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
+            android:layout_weight="0.5"
             android:background="@android:color/transparent"
             android:src="@drawable/ic_action_settings" />
 
@@ -25,6 +26,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
+            android:layout_weight="0.5"
             android:background="@android:color/transparent"
             android:src="@drawable/app_logo_white" />
 
@@ -39,6 +41,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
+            android:layout_weight="0.5"
             android:background="@android:color/transparent"
             android:src="@drawable/ic_action_search" />
 

@@ -1,3 +1,12 @@
 <resources>
     <string name="app_name">Paper Pass</string>
+
+    <string-array name="subjects_array">
+        <item>CSE3002 - Internet and Web Programming</item>
+        <item>CSE3021 - Social and Information Networks</item>
+        <item>CSE3024 - Web Mining</item>
+        <item>CSE4001 - Parallel and Distributed Computing</item>
+        <item>CSE4015 - Human Computer Interaction</item>
+        <item>MAT3004 - Applied Linear Algebra</item>
+    </string-array>
 </resources>
