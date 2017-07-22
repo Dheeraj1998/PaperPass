@@ -32,7 +32,7 @@
             android:layout_height="wrap_content"
             android:onClick="uploadPicture"
             android:src="@android:drawable/ic_menu_gallery"
-            fab:fab_label="Upload from gallery"/>
+            fab:fab_label="Upload from gallery" />
     </com.github.clans.fab.FloatingActionMenu>
 
 </ScrollView>

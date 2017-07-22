@@ -5,19 +5,20 @@
     android:orientation="horizontal">
 
     <TableRow>
+
         <ImageButton
+            android:id="@+id/settings_goback"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/ic_arrow_back"
             android:layout_gravity="center_vertical"
             android:background="@android:color/transparent"
-            android:id="@+id/settings_goback" />
+            android:src="@drawable/ic_arrow_back" />
 
         <ImageButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:background="@android:color/transparent"/>
+            android:background="@android:color/transparent" />
 
     </TableRow>
 

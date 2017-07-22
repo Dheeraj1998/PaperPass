@@ -9,24 +9,24 @@
     android:padding="20dp"
     tools:context="com.example.paperpass.Settings">
 
-        <TextView
-            android:id="@+id/name_holder"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textAlignment="center"
-            android:textAllCaps="true"
-            android:textColor="@color/colorAccent"
-            android:textSize="20sp"/>
+    <TextView
+        android:id="@+id/name_holder"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAlignment="center"
+        android:textAllCaps="true"
+        android:textColor="@color/colorAccent"
+        android:textSize="20sp" />
 
-        <android.support.v7.widget.AppCompatButton
-            android:id="@+id/btn_login"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:backgroundTint="@color/colorPrimaryDark"
-            android:onClick="beginLogout"
-            android:padding="12dp"
-            android:text="LOGOUT"
-            android:textColor="@color/colorAccent"/>
+    <android.support.v7.widget.AppCompatButton
+        android:id="@+id/btn_login"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:backgroundTint="@color/colorPrimaryDark"
+        android:onClick="beginLogout"
+        android:padding="12dp"
+        android:text="LOGOUT"
+        android:textColor="@color/colorAccent" />
 
 </LinearLayout>
