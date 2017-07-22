@@ -47,9 +47,9 @@ public class RegisterActivity extends AppCompatActivity {
         reg_email = (EditText) findViewById(R.id.reg_email);
         reg_password = (EditText) findViewById(R.id.reg_password);
 
-        name = reg_name.getText().toString();
-        email = reg_email.getText().toString();
-        password = reg_password.getText().toString();
+        name = reg_name.getText().toString().trim();
+        email = reg_email.getText().toString().trim();
+        password = reg_password.getText().toString().trim();
 
         if(check_validity()){
             reg_button.setEnabled(false);
@@ -77,9 +77,11 @@ public class RegisterActivity extends AppCompatActivity {
                             }
 
                             else{
-                                DatabaseReference user_email_ref =  myRootRef.child(mAuth.getCurrentUser().getUid());
-                                DatabaseReference user_name = user_email_ref.child("Name");
-                                user_name.setValue(name);
+                                DatabaseReference user_id_ref =  myRootRef.child(mAuth.getCurrentUser().getUid());
+
+                                user_profile UProfile = new user_profile();
+                                UProfile.setName(name);
+                                user_id_ref.setValue(UProfile);
 
                                 progressDialog.dismiss();
 
@@ -127,6 +129,5 @@ public class RegisterActivity extends AppCompatActivity {
         }
 
         return valid;
-
     }
 }
