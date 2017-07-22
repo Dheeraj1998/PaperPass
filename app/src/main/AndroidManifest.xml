@@ -15,12 +15,10 @@
         android:theme="@style/AppTheme">
         <activity android:name=".LoginActivity" />
         <activity android:name=".RegisterActivity" />
-
         <activity
             android:name=".Dashboard"
-            android:theme="@style/ActionBarTheme"
-            android:launchMode="singleTask"/>
-
+            android:launchMode="singleTask"
+            android:theme="@style/ActionBarTheme" />
         <activity
             android:name=".SplashScreen"
             android:theme="@style/SplashTheme">
@@ -30,10 +28,13 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".Settings"
-            android:theme="@style/ActionBarTheme"/>
+            android:theme="@style/ActionBarTheme" />
+        <activity
+            android:name=".Search_Page"
+            android:theme="@style/ActionBarTheme" />
+
     </application>
 
 </manifest>

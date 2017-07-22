@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -40,7 +39,6 @@ public class Settings extends AppCompatActivity {
 
         DatabaseReference myRootRef = FirebaseDatabase.getInstance().getReference("user_profile/" + mAuth.getCurrentUser().getUid());
 
-        Log.i("custom", myRootRef.toString());
         myRootRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {

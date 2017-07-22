@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal">
+
+        <AutoCompleteTextView
+            android:id="@+id/search_papers"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="3"
+            android:hint="Course Code / Subject Name"
+            android:textColor="@android:color/white"
+            android:imeOptions="actionSearch"
+            android:inputType="text"
+            android:maxLines="1"
+            android:textColorHint="#CFD8DC"
+            android:textCursorDrawable="@null" />
+
+        <ImageButton
+            android:id="@+id/search_back"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="20"
+            android:background="@android:color/transparent"
+            android:src="@drawable/ic_arrow_back" />
+
+</LinearLayout>
