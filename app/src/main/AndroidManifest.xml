@@ -34,7 +34,7 @@
         <activity
             android:name=".Search_Page"
             android:theme="@style/ActionBarTheme" />
-
+        <activity android:name=".DownloadActivity"></activity>
     </application>
 
 </manifest>

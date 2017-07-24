@@ -17,23 +17,30 @@ import android.widget.AutoCompleteTextView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 
 public class Search_Page extends AppCompatActivity {
 
     private RecyclerView qp_list;
     private Query mQuery;
-    String selected_course = "";
+    String selected_course = "", image_url, course_code;
+    private DatabaseReference mDatabase;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search__page);
+
+        mDatabase = FirebaseDatabase.getInstance().getReference().child("all_uploaded_papers");
 
         getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
         getSupportActionBar().setDisplayShowCustomEnabled(true);
@@ -89,15 +96,58 @@ public class Search_Page extends AppCompatActivity {
                 R.layout.qp_row,
                 QP_Post_Holder.class,
                 mQuery) {
+
             @Override
-            protected void populateViewHolder(QP_Post_Holder viewHolder, QP_Post model, int position) {
+            protected void populateViewHolder(QP_Post_Holder viewHolder, QP_Post model, final int position) {
                 viewHolder.setCourse_Code(model.getCourse_Code());
                 viewHolder.setUser_Id(model.getUser_Id());
                 viewHolder.setImage(getApplicationContext(), model.getImage_Url());
+
+                viewHolder.mView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        final String post_key = getRef(position).getKey();
+
+                        mDatabase.addValueEventListener(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                image_url = dataSnapshot.child(post_key).child("Image_Url").getValue().toString();
+                                course_code = dataSnapshot.child(post_key).child("Course_Code").getValue().toString();
+                                open_downloadPage();
+                            }
+
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+//                        Do nothing!
+                            }
+                        });
+                    }
+                });
             }
         };
 
         qp_list.setAdapter(firebaseRecyclerAdapter);
+    }
+
+    public void open_downloadPage(){
+        try {
+            if (!image_url.isEmpty()) {
+                Intent temp = new Intent(Search_Page.this, DownloadActivity.class);
+                temp.putExtra("image_url", image_url);
+                temp.putExtra("course_code", course_code);
+
+                image_url = "";
+                course_code = "";
+
+                startActivity(temp);
+            } else {
+                Toast.makeText(getApplicationContext(), "Please try after some time!", Toast.LENGTH_SHORT).show();
+            }
+        }
+
+        catch (Exception error){
+            Toast.makeText(getApplicationContext(), "Please wait!", Toast.LENGTH_SHORT).show();
+        }
     }
 
     public static class QP_Post_Holder extends RecyclerView.ViewHolder {

@@ -6,4 +6,5 @@
 
     <!-- Customized color below. -->
     <color name="textColorHint">#ffffff</color>
+    <color name="progressBar">#ffcc0000</color>
 </resources>

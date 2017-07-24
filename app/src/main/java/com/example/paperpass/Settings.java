@@ -58,7 +58,7 @@ public class Settings extends AppCompatActivity {
         getSupportActionBar().setDisplayShowCustomEnabled(true);
         getSupportActionBar().setCustomView(R.layout.settings_actionbar);
 
-        View view =getSupportActionBar().getCustomView();
+        View view = getSupportActionBar().getCustomView();
 
         ImageButton imageButton= (ImageButton)view.findViewById(R.id.settings_goback);
         imageButton.setOnClickListener(new View.OnClickListener() {

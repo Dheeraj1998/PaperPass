@@ -16,7 +16,9 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
@@ -44,11 +46,13 @@ import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
 import static android.R.attr.bitmap;
+import static android.R.attr.onClick;
 
 public class Dashboard extends AppCompatActivity {
 
@@ -57,7 +61,7 @@ public class Dashboard extends AppCompatActivity {
     private static StorageReference mStorage;
     final Context thisContext = this;
     FirebaseAuth mAuth;
-    String Course_Code, user_name;
+    String Course_Code, user_name, image_url, course_code;
     private RecyclerView qp_list;
     private DatabaseReference mDatabase;
 
@@ -125,15 +129,58 @@ public class Dashboard extends AppCompatActivity {
                 R.layout.qp_row,
                 QP_Post_Holder.class,
                 mDatabase) {
+
             @Override
-            protected void populateViewHolder(QP_Post_Holder viewHolder, QP_Post model, int position) {
+            protected void populateViewHolder(QP_Post_Holder viewHolder, QP_Post model, final int position) {
                 viewHolder.setCourse_Code(model.getCourse_Code());
                 viewHolder.setUser_Id(model.getUser_Id());
                 viewHolder.setImage(getApplicationContext(), model.getImage_Url());
+
+                viewHolder.mView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        final String post_key = getRef(position).getKey();
+
+                        mDatabase.addValueEventListener(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                image_url = dataSnapshot.child(post_key).child("Image_Url").getValue().toString();
+                                course_code = dataSnapshot.child(post_key).child("Course_Code").getValue().toString();
+                                open_downloadPage();
+                            }
+
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+//                        Do nothing!
+                            }
+                        });
+                    }
+                });
             }
         };
 
         qp_list.setAdapter(firebaseRecyclerAdapter);
+    }
+
+    public void open_downloadPage(){
+        try {
+            if (!image_url.isEmpty()) {
+                Intent temp = new Intent(Dashboard.this, DownloadActivity.class);
+                temp.putExtra("image_url", image_url);
+                temp.putExtra("course_code", course_code);
+
+                image_url = "";
+                course_code = "";
+
+                startActivity(temp);
+            } else {
+                Toast.makeText(getApplicationContext(), "Please try after some time!", Toast.LENGTH_SHORT).show();
+            }
+        }
+
+        catch (Exception error){
+            Toast.makeText(getApplicationContext(), "Please wait!", Toast.LENGTH_SHORT).show();
+        }
     }
 
     public void uploadPicture(View v) {
@@ -351,7 +398,7 @@ public class Dashboard extends AppCompatActivity {
     public static class QP_Post_Holder extends RecyclerView.ViewHolder {
         View mView;
 
-        public QP_Post_Holder(View itemView) {
+        public QP_Post_Holder(final View itemView) {
             super(itemView);
             mView = itemView;
         }
