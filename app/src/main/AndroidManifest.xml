@@ -34,7 +34,10 @@
         <activity
             android:name=".Search_Page"
             android:theme="@style/ActionBarTheme" />
-        <activity android:name=".DownloadActivity"></activity>
+        <activity android:name=".DownloadActivity" />
+        <activity
+            android:name=".UserPosts"
+            android:theme="@style/ActionBarTheme" />
     </application>
 
 </manifest>

@@ -1,17 +1,12 @@
 package com.example.paperpass;
 
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.content.Context;
-import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
-import android.net.Uri;
+import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -27,17 +22,13 @@ import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
-import android.support.v7.app.NotificationCompat;
-import android.support.v4.app.TaskStackBuilder;
-
-import static android.R.attr.id;
 
 public class DownloadActivity extends AppCompatActivity {
 
-    private String image_url, course_code;
     int count = 1;
     boolean picture_check = false;
     Button download_button;
+    private String image_url, course_code;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,7 +37,7 @@ public class DownloadActivity extends AppCompatActivity {
 
         final ProgressBar mProgressSpin = (ProgressBar) findViewById(R.id.progress_bar);
         mProgressSpin.getIndeterminateDrawable()
-                .setColorFilter(ContextCompat.getColor(this, R.color.progressBar), PorterDuff.Mode.SRC_IN );
+                .setColorFilter(ContextCompat.getColor(this, R.color.progressBar), PorterDuff.Mode.SRC_IN);
 
         download_button = (Button) findViewById(R.id.download_button);
         image_url = getIntent().getStringExtra("image_url");
@@ -73,12 +64,12 @@ public class DownloadActivity extends AppCompatActivity {
         });
     }
 
-    public void downloadPicture(View v){
+    public void downloadPicture(View v) {
         download_button.setText("DOWNLOADING...");
         download_button.setEnabled(false);
         download_button.setBackgroundColor(Color.parseColor("#ff0099cc"));
 
-        if(picture_check) {
+        if (picture_check) {
             FirebaseStorage storage = FirebaseStorage.getInstance();
             StorageReference storageRef = storage.getReferenceFromUrl(image_url);
 

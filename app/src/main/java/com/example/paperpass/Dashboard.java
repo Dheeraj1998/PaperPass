@@ -4,11 +4,10 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v7.app.ActionBar;
@@ -16,11 +15,8 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.ImageButton;
@@ -37,22 +33,17 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.squareup.picasso.Picasso;
 
-import java.io.ByteArrayOutputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
+import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
-
-import static android.R.attr.bitmap;
-import static android.R.attr.onClick;
 
 public class Dashboard extends AppCompatActivity {
 
@@ -64,12 +55,16 @@ public class Dashboard extends AppCompatActivity {
     String Course_Code, user_name, image_url, course_code;
     private RecyclerView qp_list;
     private DatabaseReference mDatabase;
+    int count = 0;
+    ProgressDialog progressDialog;
+    private Uri camera_image_uri;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dashboard);
 
+        count = 0;
         mStorage = FirebaseStorage.getInstance().getReference();
         mAuth = FirebaseAuth.getInstance();
         DatabaseReference myRootRef = FirebaseDatabase.getInstance().getReference("user_profile/" + mAuth.getCurrentUser().getUid());
@@ -88,7 +83,12 @@ public class Dashboard extends AppCompatActivity {
 
         qp_list = (RecyclerView) findViewById(R.id.qp_list);
         qp_list.setHasFixedSize(true);
-        qp_list.setLayoutManager(new LinearLayoutManager(this));
+
+        LinearLayoutManager layoutManager = new LinearLayoutManager(getApplicationContext());
+        layoutManager.setReverseLayout(true);
+        layoutManager.setStackFromEnd(true);
+
+        qp_list.setLayoutManager(layoutManager);
 
 //         Customizing the action bar
         getSupportActionBar().setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
@@ -103,6 +103,7 @@ public class Dashboard extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent temp = new Intent(Dashboard.this, Settings.class);
+                temp.putExtra("user_name", user_name);
                 startActivity(temp);
             }
         });
@@ -131,7 +132,7 @@ public class Dashboard extends AppCompatActivity {
                 mDatabase) {
 
             @Override
-            protected void populateViewHolder(QP_Post_Holder viewHolder, QP_Post model, final int position) {
+            protected void populateViewHolder(final QP_Post_Holder viewHolder, final QP_Post model, final int position) {
                 viewHolder.setCourse_Code(model.getCourse_Code());
                 viewHolder.setUser_Id(model.getUser_Id());
                 viewHolder.setImage(getApplicationContext(), model.getImage_Url());
@@ -146,7 +147,38 @@ public class Dashboard extends AppCompatActivity {
                             public void onDataChange(DataSnapshot dataSnapshot) {
                                 image_url = dataSnapshot.child(post_key).child("Image_Url").getValue().toString();
                                 course_code = dataSnapshot.child(post_key).child("Course_Code").getValue().toString();
-                                open_downloadPage();
+
+                                progressDialog = new ProgressDialog(Dashboard.this);
+                                progressDialog.setIndeterminate(true);
+                                progressDialog.setMessage("Downloading picture...");
+                                progressDialog.setCancelable(false);
+                                progressDialog.show();
+
+                                FirebaseStorage storage = FirebaseStorage.getInstance();
+                                StorageReference storageRef = storage.getReferenceFromUrl(image_url);
+
+                                File storagePath = new File(Environment.getExternalStorageDirectory(), "Paper Pass");
+
+                                if (!storagePath.exists()) {
+                                    storagePath.mkdirs();
+                                }
+
+                                final File myFile = new File(storagePath, course_code + "_" + count + ".png");
+                                count++;
+
+                                storageRef.getFile(myFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
+                                    @Override
+                                    public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
+                                        progressDialog.dismiss();
+                                        Toast.makeText(getApplicationContext(), "Download successful!", Toast.LENGTH_SHORT).show();
+                                    }
+                                }).addOnFailureListener(new OnFailureListener() {
+                                    @Override
+                                    public void onFailure(@NonNull Exception exception) {
+                                        progressDialog.dismiss();
+                                        Toast.makeText(getApplicationContext(), "Download failed!", Toast.LENGTH_SHORT).show();
+                                    }
+                                });
                             }
 
                             @Override
@@ -162,27 +194,7 @@ public class Dashboard extends AppCompatActivity {
         qp_list.setAdapter(firebaseRecyclerAdapter);
     }
 
-    public void open_downloadPage(){
-        try {
-            if (!image_url.isEmpty()) {
-                Intent temp = new Intent(Dashboard.this, DownloadActivity.class);
-                temp.putExtra("image_url", image_url);
-                temp.putExtra("course_code", course_code);
-
-                image_url = "";
-                course_code = "";
-
-                startActivity(temp);
-            } else {
-                Toast.makeText(getApplicationContext(), "Please try after some time!", Toast.LENGTH_SHORT).show();
-            }
-        }
-
-        catch (Exception error){
-            Toast.makeText(getApplicationContext(), "Please wait!", Toast.LENGTH_SHORT).show();
-        }
-    }
-
+    // Methods for the upload of picture from gallery and taking picture from camera
     public void uploadPicture(View v) {
         Intent temp = new Intent(Intent.ACTION_PICK);
         temp.setType("image/*");
@@ -192,7 +204,36 @@ public class Dashboard extends AppCompatActivity {
     public void takePicture(View v) {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-            startActivityForResult(takePictureIntent, CAMERA_REQUEST_CODE);
+            try {
+                File image_file = this.createTemporaryFile("test", ".png");
+                camera_image_uri = Uri.fromFile(image_file);
+
+                Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                intent.putExtra(MediaStore.EXTRA_OUTPUT, camera_image_uri);
+
+                startActivityForResult(intent, CAMERA_REQUEST_CODE);
+            } catch (Exception error) {
+
+            }
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        if (FirebaseDatabase.getInstance() != null) {
+            FirebaseDatabase.getInstance().goOnline();
+        }
+    }
+
+    @Override
+    public void onPause() {
+
+        super.onPause();
+
+        if (FirebaseDatabase.getInstance() != null) {
+            FirebaseDatabase.getInstance().goOffline();
         }
     }
 
@@ -201,19 +242,8 @@ public class Dashboard extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == GALLERY_INTENT && resultCode == RESULT_OK) {
-            Uri uri = data.getData();
-
-            InputStream imageStream = null;
-            try {
-                imageStream = getContentResolver().openInputStream(uri);
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            }
-
-            Bitmap bmp = BitmapFactory.decodeStream(imageStream);
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            bmp.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-            final byte[] dataBAOS = baos.toByteArray();
+            // Getting high-res images
+            final Uri uri = data.getData();
 
             // Setting up the custom input dialog box
             LayoutInflater li = LayoutInflater.from(thisContext);
@@ -240,23 +270,16 @@ public class Dashboard extends AppCompatActivity {
                                     if (subjects_list.contains(Course_Code)) {
                                         final ProgressDialog progressDialog = new ProgressDialog(Dashboard.this);
                                         progressDialog.setIndeterminate(true);
-                                        progressDialog.setMessage("Uploading image, please wait!");
                                         progressDialog.setCancelable(false);
                                         progressDialog.show();
 
                                         final String unique_name = UUID.randomUUID().toString();
                                         final StorageReference file_path = mStorage.child("question_papers").child(unique_name);
-                                        UploadTask upload_image = file_path.putBytes(dataBAOS);
+                                        UploadTask upload_image = file_path.putFile(uri);
 
                                         upload_image.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                                             @Override
                                             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                                                DatabaseReference user_profile_reg = FirebaseDatabase.getInstance().getReference("user_profile").child(mAuth.getCurrentUser().getUid());
-                                                user_profile_reg.child("uploaded_papers").push().setValue(unique_name);
-
-                                                InputMethodManager in = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
-                                                in.hideSoftInputFromWindow(userInput.getWindowToken(), 0);
-
                                                 @SuppressWarnings("VisibleForTests") Uri downloadUrl = taskSnapshot.getDownloadUrl();
 
                                                 DatabaseReference question_paper_reg = FirebaseDatabase.getInstance().getReference("all_uploaded_papers");
@@ -265,15 +288,22 @@ public class Dashboard extends AppCompatActivity {
                                                 question_paper_reg.child(push_key).child("Image_Id").setValue(unique_name);
                                                 question_paper_reg.child(push_key).child("Image_Url").setValue(downloadUrl.toString());
                                                 question_paper_reg.child(push_key).child("Course_Code").setValue(Course_Code);
+                                                question_paper_reg.child(push_key).child("User_UUID").setValue(mAuth.getCurrentUser().getUid());
 
                                                 progressDialog.dismiss();
-                                                Toast.makeText(getApplicationContext(), "The image has been uploaded!", Toast.LENGTH_SHORT).show();
+                                                Toast.makeText(getApplicationContext(), "Upload was successful!", Toast.LENGTH_SHORT).show();
                                             }
                                         }).addOnFailureListener(new OnFailureListener() {
                                             @Override
                                             public void onFailure(@NonNull Exception e) {
                                                 progressDialog.dismiss();
-                                                Toast.makeText(getApplicationContext(), "The image could not be uploaded. Try again!", Toast.LENGTH_SHORT).show();
+                                                Toast.makeText(getApplicationContext(), "Upload failed. Try again!", Toast.LENGTH_SHORT).show();
+                                            }
+                                        }).addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+                                            @Override
+                                            public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
+                                                @SuppressWarnings("VisibleForTests") double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
+                                                progressDialog.setMessage("Uploaded " + ((int) progress) + "%...");
                                             }
                                         });
                                     } else {
@@ -302,12 +332,6 @@ public class Dashboard extends AppCompatActivity {
 
         } else if (requestCode == CAMERA_REQUEST_CODE && resultCode == RESULT_OK) {
 
-            // Getting the bitmap instead of URI
-            Bitmap bitmap = (Bitmap) data.getExtras().get("data");
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-            final byte[] dataBAOS = baos.toByteArray();
-
             // Setting up the custom input dialog box
             LayoutInflater li = LayoutInflater.from(thisContext);
             View dialogView = li.inflate(R.layout.user_input_dialog, null);
@@ -339,17 +363,11 @@ public class Dashboard extends AppCompatActivity {
 
                                         final String unique_name = UUID.randomUUID().toString();
                                         final StorageReference file_path = mStorage.child("question_papers").child(unique_name);
-                                        UploadTask upload_image = file_path.putBytes(dataBAOS);
+                                        UploadTask upload_image = file_path.putFile(camera_image_uri);
 
                                         upload_image.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                                             @Override
                                             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                                                DatabaseReference user_profile_reg = FirebaseDatabase.getInstance().getReference("user_profile").child(mAuth.getCurrentUser().getUid());
-                                                user_profile_reg.child("uploaded_papers").push().setValue(unique_name);
-
-                                                InputMethodManager in = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
-                                                in.hideSoftInputFromWindow(userInput.getWindowToken(), 0);
-
                                                 @SuppressWarnings("VisibleForTests") Uri downloadUrl = taskSnapshot.getDownloadUrl();
 
                                                 DatabaseReference question_paper_reg = FirebaseDatabase.getInstance().getReference("all_uploaded_papers");
@@ -358,15 +376,22 @@ public class Dashboard extends AppCompatActivity {
                                                 question_paper_reg.child(push_key).child("Image_Id").setValue(unique_name);
                                                 question_paper_reg.child(push_key).child("Image_Url").setValue(downloadUrl.toString());
                                                 question_paper_reg.child(push_key).child("Course_Code").setValue(Course_Code);
+                                                question_paper_reg.child(push_key).child("User_UUID").setValue(mAuth.getCurrentUser().getUid());
 
                                                 progressDialog.dismiss();
-                                                Toast.makeText(getApplicationContext(), "The image has been uploaded!", Toast.LENGTH_SHORT).show();
+                                                Toast.makeText(getApplicationContext(), "Upload was successful!", Toast.LENGTH_SHORT).show();
                                             }
                                         }).addOnFailureListener(new OnFailureListener() {
                                             @Override
                                             public void onFailure(@NonNull Exception e) {
                                                 progressDialog.dismiss();
-                                                Toast.makeText(getApplicationContext(), "The image could not be uploaded. Try again!", Toast.LENGTH_SHORT).show();
+                                                Toast.makeText(getApplicationContext(), "Upload failed. Try again!", Toast.LENGTH_SHORT).show();
+                                            }
+                                        }).addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+                                            @Override
+                                            public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
+                                                @SuppressWarnings("VisibleForTests") double progress = (100.0 * taskSnapshot.getBytesTransferred()) / taskSnapshot.getTotalByteCount();
+                                                progressDialog.setMessage("Uploaded " + ((int) progress) + "%...");
                                             }
                                         });
                                     } else {
@@ -389,10 +414,18 @@ public class Dashboard extends AppCompatActivity {
                     alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(Color.parseColor("#43A047"));
                 }
             });
-
             alertDialog.show();
-
         }
+    }
+
+    // Method to create temporary file during the taking the picture from camera
+    private File createTemporaryFile(String part, String ext) throws Exception {
+        File tempDir = Environment.getExternalStorageDirectory();
+        tempDir = new File(tempDir.getAbsolutePath() + "/.temp/");
+        if (!tempDir.exists()) {
+            tempDir.mkdirs();
+        }
+        return File.createTempFile(part, ext, tempDir);
     }
 
     public static class QP_Post_Holder extends RecyclerView.ViewHolder {
@@ -415,7 +448,7 @@ public class Dashboard extends AppCompatActivity {
 
         public void setImage(Context ctx, String image) {
             ImageView qp_image = (ImageView) mView.findViewById(R.id.qp_image);
-            Picasso.with(ctx).load(image).into(qp_image);
+            Picasso.with(ctx).load(image).resize(100, 100).into(qp_image);
         }
     }
 }

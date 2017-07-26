@@ -30,17 +30,18 @@
             android:layout_marginTop="30dp"
             android:text="USER DETAILS"
             android:textColor="@color/colorAccent"
-            android:textSize="18sp"/>
+            android:textSize="18sp" />
 
         <Button
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="MY PROFILE"/>
+            android:text="MY PROFILE" />
 
         <Button
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="MY UPLOADED POSTS"/>
+            android:onClick="openUserPosts"
+            android:text="MY UPLOADED POSTS" />
 
         <TextView
             android:layout_width="match_parent"
@@ -48,17 +49,17 @@
             android:layout_marginTop="40dp"
             android:text="PAPER PASS"
             android:textColor="@color/colorAccent"
-            android:textSize="18sp"/>
+            android:textSize="18sp" />
 
         <Button
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="ABOUT US"/>
+            android:text="ABOUT US" />
 
         <Button
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="CONTACT US"/>
+            android:text="CONTACT US" />
 
         <android.support.v7.widget.AppCompatButton
             android:id="@+id/btn_login"

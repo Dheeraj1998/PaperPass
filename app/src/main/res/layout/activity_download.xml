@@ -12,7 +12,7 @@
         android:layout_height="match_parent"
         android:layout_above="@+id/download_button"
         android:contentDescription="QUESTION PAPER"
-        android:scaleType="fitXY"/>
+        android:scaleType="fitXY" />
 
     <ProgressBar
         android:id="@+id/progress_bar"
@@ -20,7 +20,7 @@
         android:layout_height="match_parent"
         android:layout_above="@+id/download_button"
         android:indeterminateTint="@android:color/holo_red_dark" />
-    
+
     <android.support.v7.widget.AppCompatButton
         android:id="@+id/download_button"
         style="@style/Base.Widget.AppCompat.Button.Borderless.Colored"
@@ -31,7 +31,6 @@
         android:onClick="downloadPicture"
         android:text="PLEASE WAIT..."
         android:textColor="@color/colorAccent"
-        android:textSize="20sp"
-        />
-    
+        android:textSize="20sp" />
+
 </RelativeLayout>

@@ -34,13 +34,13 @@ public class RegisterActivity extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
     }
 
-    public void openLogin(View v){
+    public void openLogin(View v) {
         Intent temp = new Intent(RegisterActivity.this, LoginActivity.class);
         startActivity(temp);
         finish();
     }
 
-    public void beginRegister(View v){
+    public void beginRegister(View v) {
         reg_button = (Button) findViewById(R.id.btn_register);
 
         reg_name = (EditText) findViewById(R.id.reg_name);
@@ -51,7 +51,7 @@ public class RegisterActivity extends AppCompatActivity {
         email = reg_email.getText().toString().trim();
         password = reg_password.getText().toString().trim();
 
-        if(check_validity()){
+        if (check_validity()) {
             reg_button.setEnabled(false);
 
             final ProgressDialog progressDialog = new ProgressDialog(this);
@@ -74,10 +74,8 @@ public class RegisterActivity extends AppCompatActivity {
 
                                 Toast.makeText(getApplicationContext(), "Registration failed!", Toast.LENGTH_SHORT).show();
                                 reg_button.setEnabled(true);
-                            }
-
-                            else{
-                                DatabaseReference user_id_ref =  myRootRef.child(mAuth.getCurrentUser().getUid());
+                            } else {
+                                DatabaseReference user_id_ref = myRootRef.child(mAuth.getCurrentUser().getUid());
 
                                 user_profile UProfile = new user_profile();
                                 UProfile.setName(name);
@@ -93,19 +91,17 @@ public class RegisterActivity extends AppCompatActivity {
                             }
                         }
                     });
-        }
-
-        else{
+        } else {
             //Do nothing
         }
     }
 
-    public boolean check_validity(){
+    public boolean check_validity() {
 
         boolean valid = true;
 
         if (name.isEmpty()) {
-            Log.i("custom","Name is empty!");
+            Log.i("custom", "Name is empty!");
             reg_name.setError("The field cannot be empty!");
             valid = false;
         } else {
@@ -113,7 +109,7 @@ public class RegisterActivity extends AppCompatActivity {
         }
 
         if (email.isEmpty() || !android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            Log.i("custom","Email is empty!");
+            Log.i("custom", "Email is empty!");
             reg_email.setError("Enter a valid email address!");
             valid = false;
         } else {
@@ -121,7 +117,7 @@ public class RegisterActivity extends AppCompatActivity {
         }
 
         if (password.isEmpty()) {
-            Log.i("custom","Pass is empty!");
+            Log.i("custom", "Pass is empty!");
             reg_password.setError("The field cannot be empty!");
             valid = false;
         } else {

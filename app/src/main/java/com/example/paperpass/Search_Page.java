@@ -1,16 +1,16 @@
 package com.example.paperpass;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
+import android.os.Environment;
+import android.support.annotation.NonNull;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.View;
-import android.view.WindowManager;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
@@ -20,20 +20,28 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FileDownloadTask;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 import com.squareup.picasso.Picasso;
+
+import java.io.File;
 
 public class Search_Page extends AppCompatActivity {
 
+    String selected_course = "", image_url, course_code;
     private RecyclerView qp_list;
     private Query mQuery;
-    String selected_course = "", image_url, course_code;
     private DatabaseReference mDatabase;
+    int count = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,11 +61,9 @@ public class Search_Page extends AppCompatActivity {
         imageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (!userInput.getText().toString().equals("")){
+                if (!userInput.getText().toString().equals("")) {
                     userInput.setText("");
-                }
-
-                else {
+                } else {
                     Intent temp = new Intent(Search_Page.this, Dashboard.class);
                     startActivity(temp);
                     finish();
@@ -76,15 +82,18 @@ public class Search_Page extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 selected_course = parent.getItemAtPosition(position).toString();
-                InputMethodManager imm = (InputMethodManager)getSystemService(INPUT_METHOD_SERVICE);
-                imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
                 searchResults();
             }
         });
 
         qp_list = (RecyclerView) findViewById(R.id.search_list);
         qp_list.setHasFixedSize(true);
-        qp_list.setLayoutManager(new LinearLayoutManager(this));
+
+        LinearLayoutManager layoutManager = new LinearLayoutManager(getApplicationContext());
+        layoutManager.setReverseLayout(true);
+        layoutManager.setStackFromEnd(true);
+
+        qp_list.setLayoutManager(layoutManager);
     }
 
     public void searchResults() {
@@ -113,7 +122,38 @@ public class Search_Page extends AppCompatActivity {
                             public void onDataChange(DataSnapshot dataSnapshot) {
                                 image_url = dataSnapshot.child(post_key).child("Image_Url").getValue().toString();
                                 course_code = dataSnapshot.child(post_key).child("Course_Code").getValue().toString();
-                                open_downloadPage();
+
+                                final ProgressDialog progressDialog = new ProgressDialog(Search_Page.this);
+                                progressDialog.setIndeterminate(true);
+                                progressDialog.setMessage("Downloading picture...");
+                                progressDialog.setCancelable(false);
+                                progressDialog.show();
+
+                                FirebaseStorage storage = FirebaseStorage.getInstance();
+                                StorageReference storageRef = storage.getReferenceFromUrl(image_url);
+
+                                File storagePath = new File(Environment.getExternalStorageDirectory(), "Paper Pass");
+
+                                if (!storagePath.exists()) {
+                                    storagePath.mkdirs();
+                                }
+
+                                final File myFile = new File(storagePath, course_code + "_" + count + ".png");
+                                count++;
+
+                                storageRef.getFile(myFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
+                                    @Override
+                                    public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
+                                        progressDialog.dismiss();
+                                        Toast.makeText(getApplicationContext(), "Download successful!", Toast.LENGTH_SHORT).show();
+                                    }
+                                }).addOnFailureListener(new OnFailureListener() {
+                                    @Override
+                                    public void onFailure(@NonNull Exception exception) {
+                                        progressDialog.dismiss();
+                                        Toast.makeText(getApplicationContext(), "Download failed!", Toast.LENGTH_SHORT).show();
+                                    }
+                                });
                             }
 
                             @Override
@@ -129,24 +169,22 @@ public class Search_Page extends AppCompatActivity {
         qp_list.setAdapter(firebaseRecyclerAdapter);
     }
 
-    public void open_downloadPage(){
-        try {
-            if (!image_url.isEmpty()) {
-                Intent temp = new Intent(Search_Page.this, DownloadActivity.class);
-                temp.putExtra("image_url", image_url);
-                temp.putExtra("course_code", course_code);
+    @Override
+    protected void onResume() {
+        super.onResume();
 
-                image_url = "";
-                course_code = "";
-
-                startActivity(temp);
-            } else {
-                Toast.makeText(getApplicationContext(), "Please try after some time!", Toast.LENGTH_SHORT).show();
-            }
+        if (FirebaseDatabase.getInstance() != null) {
+            FirebaseDatabase.getInstance().goOnline();
         }
+    }
 
-        catch (Exception error){
-            Toast.makeText(getApplicationContext(), "Please wait!", Toast.LENGTH_SHORT).show();
+    @Override
+    public void onPause() {
+
+        super.onPause();
+
+        if (FirebaseDatabase.getInstance() != null) {
+            FirebaseDatabase.getInstance().goOffline();
         }
     }
 

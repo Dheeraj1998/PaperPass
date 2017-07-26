@@ -7,8 +7,8 @@
     android:layout_height="match_parent"
     android:background="@color/colorPrimary"
     android:orientation="vertical"
-    android:paddingStart="15dp"
     android:paddingEnd="15dp"
+    android:paddingStart="15dp"
     tools:context="com.example.paperpass.Dashboard">
 
     <android.support.v7.widget.RecyclerView

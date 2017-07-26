@@ -37,12 +37,10 @@ public class LoginActivity extends AppCompatActivity {
             username = getIntent().getStringExtra("username");
             log_email.setText(username);
 
-            if (!username.equals("")){
+            if (!username.equals("")) {
                 log_password.requestFocus();
             }
-        }
-
-        catch (Exception e){
+        } catch (Exception e) {
             // Do nothing.
             // Proceed with normal execution
         }
@@ -50,17 +48,17 @@ public class LoginActivity extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
     }
 
-    public void openRegister(View v){
+    public void openRegister(View v) {
         Intent temp = new Intent(LoginActivity.this, RegisterActivity.class);
         startActivity(temp);
         finish();
     }
 
-    public void beginLogin(View v){
+    public void beginLogin(View v) {
         username = log_email.getText().toString();
         password = log_password.getText().toString();
 
-        if(check_validity()) {
+        if (check_validity()) {
             final ProgressDialog progressDialog = new ProgressDialog(this);
             progressDialog.setIndeterminate(true);
             progressDialog.setMessage("Authenticating user...");
@@ -90,9 +88,7 @@ public class LoginActivity extends AppCompatActivity {
                             }
                         }
                     });
-        }
-
-        else{
+        } else {
             // Do nothing!
         }
     }
