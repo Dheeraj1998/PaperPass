@@ -23,7 +23,6 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="20dp"
         android:layout_weight="1"
         android:orientation="vertical">
 
@@ -78,9 +77,21 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
+            android:layout_marginBottom="20dp"
             android:gravity="center"
+            android:onClick="startPasswordRecovery"
+            android:padding="5dp"
+            android:text="@string/forgot_password"
+            android:textColor="@color/colorAccent"
+            android:textSize="16sp" />
+
+        <TextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:padding="5dp"
             android:onClick="openRegister"
-            android:text="No account yet? Create one!"
+            android:text="@string/new_account"
             android:textColor="@color/colorAccent"
             android:textSize="16sp" />
 

@@ -9,4 +9,7 @@
         <item>CSE4015 - Human Computer Interaction</item>
         <item>MAT3004 - Applied Linear Algebra</item>
     </string-array>
+
+    <string name="forgot_password"><u>Forgot Password?</u></string>
+    <string name="new_account"><u>No account yet? Create one!</u></string>
 </resources>

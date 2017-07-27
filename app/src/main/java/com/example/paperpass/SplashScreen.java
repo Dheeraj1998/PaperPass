@@ -26,9 +26,17 @@ public class SplashScreen extends AppCompatActivity {
                 FirebaseUser user = firebaseAuth.getCurrentUser();
                 if (user != null) {
                     // User is signed in
-                    Intent temp = new Intent(SplashScreen.this, Dashboard.class);
-                    startActivity(temp);
-                    finish();
+
+                    if (user.isEmailVerified()) {
+                        Intent temp = new Intent(SplashScreen.this, Dashboard.class);
+                        startActivity(temp);
+                        finish();
+                    } else {
+                        // User is not email-verified
+                        Intent temp = new Intent(SplashScreen.this, LoginActivity.class);
+                        startActivity(temp);
+                        finish();
+                    }
                 } else {
                     // User is signed out
                     Intent temp = new Intent(SplashScreen.this, LoginActivity.class);
