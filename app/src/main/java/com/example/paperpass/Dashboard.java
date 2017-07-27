@@ -53,10 +53,10 @@ public class Dashboard extends AppCompatActivity {
     final Context thisContext = this;
     FirebaseAuth mAuth;
     String Course_Code, user_name, image_url, course_code;
-    private RecyclerView qp_list;
-    private DatabaseReference mDatabase;
     int count = 0;
     ProgressDialog progressDialog;
+    private RecyclerView qp_list;
+    private DatabaseReference mDatabase;
     private Uri camera_image_uri;
 
     @Override

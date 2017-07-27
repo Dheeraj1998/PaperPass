@@ -13,30 +13,40 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".LoginActivity" />
-        <activity android:name=".RegisterActivity" />
+        <activity
+            android:name=".LoginActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".RegisterActivity"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".Dashboard"
             android:launchMode="singleTask"
+            android:screenOrientation="portrait"
             android:theme="@style/ActionBarTheme" />
         <activity
             android:name=".SplashScreen"
+            android:screenOrientation="portrait"
             android:theme="@style/SplashTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity
             android:name=".Settings"
+            android:screenOrientation="portrait"
             android:theme="@style/ActionBarTheme" />
         <activity
             android:name=".Search_Page"
+            android:screenOrientation="portrait"
             android:theme="@style/ActionBarTheme" />
-        <activity android:name=".DownloadActivity" />
+        <activity
+            android:name=".DownloadActivity"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".UserPosts"
+            android:screenOrientation="portrait"
             android:theme="@style/ActionBarTheme" />
     </application>
 

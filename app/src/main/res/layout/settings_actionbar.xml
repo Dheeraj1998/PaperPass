@@ -18,10 +18,10 @@
             android:id="@+id/ac_bar_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingEnd="10dp"
-            android:paddingStart="10dp"
             android:layout_weight="1"
-            android:background="@android:color/transparent" />
+            android:background="@android:color/transparent"
+            android:paddingEnd="10dp"
+            android:paddingStart="10dp" />
 
     </TableRow>
 

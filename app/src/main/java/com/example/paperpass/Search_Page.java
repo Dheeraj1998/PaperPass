@@ -38,10 +38,10 @@ import java.io.File;
 public class Search_Page extends AppCompatActivity {
 
     String selected_course = "", image_url, course_code;
+    int count = 0;
     private RecyclerView qp_list;
     private Query mQuery;
     private DatabaseReference mDatabase;
-    int count = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
