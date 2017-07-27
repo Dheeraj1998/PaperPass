@@ -19,6 +19,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -33,6 +34,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.OnProgressListener;
@@ -52,11 +54,11 @@ public class Dashboard extends AppCompatActivity {
     private static StorageReference mStorage;
     final Context thisContext = this;
     FirebaseAuth mAuth;
-    String Course_Code, user_name, image_url, course_code;
+    String Course_Code, user_name, image_url, course_code, image_id, image_uuid, user_fcm;
     int count = 0;
     ProgressDialog progressDialog;
     private RecyclerView qp_list;
-    private DatabaseReference mDatabase;
+    private DatabaseReference mDatabase, rDatabase;
     private Uri camera_image_uri;
 
     @Override
@@ -123,6 +125,7 @@ public class Dashboard extends AppCompatActivity {
         super.onStart();
 
         mDatabase = FirebaseDatabase.getInstance().getReference().child("all_uploaded_papers");
+        rDatabase = FirebaseDatabase.getInstance().getReference().child("reported_posts");
 
         // Creating the Firebase Recycler Adapter
         FirebaseRecyclerAdapter<QP_Post, QP_Post_Holder> firebaseRecyclerAdapter = new FirebaseRecyclerAdapter<QP_Post, QP_Post_Holder>(
@@ -137,55 +140,105 @@ public class Dashboard extends AppCompatActivity {
                 viewHolder.setUser_Id(model.getUser_Id());
                 viewHolder.setImage(getApplicationContext(), model.getImage_Url());
 
-                viewHolder.mView.setOnClickListener(new View.OnClickListener() {
+                viewHolder.mView.setOnLongClickListener(new View.OnLongClickListener() {
                     @Override
-                    public void onClick(View v) {
+                    public boolean onLongClick(View v) {
                         final String post_key = getRef(position).getKey();
 
-                        mDatabase.addValueEventListener(new ValueEventListener() {
+                        // Setting up the custom input dialog box
+                        LayoutInflater li = LayoutInflater.from(thisContext);
+                        View dialogView = li.inflate(R.layout.post_longclick, null);
+                        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(thisContext);
+                        alertDialogBuilder.setTitle("Options");
+                        alertDialogBuilder.setView(dialogView);
+                        final AlertDialog alertDialog = alertDialogBuilder.create();
+                        alertDialog.show();
+
+                        Button download_button = (Button) dialogView.findViewById(R.id.post_download);
+                        download_button.setOnClickListener(new View.OnClickListener() {
                             @Override
-                            public void onDataChange(DataSnapshot dataSnapshot) {
-                                image_url = dataSnapshot.child(post_key).child("Image_Url").getValue().toString();
-                                course_code = dataSnapshot.child(post_key).child("Course_Code").getValue().toString();
-
-                                progressDialog = new ProgressDialog(Dashboard.this);
-                                progressDialog.setIndeterminate(true);
-                                progressDialog.setMessage("Downloading picture...");
-                                progressDialog.setCancelable(false);
-                                progressDialog.show();
-
-                                FirebaseStorage storage = FirebaseStorage.getInstance();
-                                StorageReference storageRef = storage.getReferenceFromUrl(image_url);
-
-                                File storagePath = new File(Environment.getExternalStorageDirectory(), "Paper Pass");
-
-                                if (!storagePath.exists()) {
-                                    storagePath.mkdirs();
-                                }
-
-                                final File myFile = new File(storagePath, course_code + "_" + count + ".png");
-                                count++;
-
-                                storageRef.getFile(myFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
+                            public void onClick(View v) {
+                                // Code for downloading the picture
+                                mDatabase.addValueEventListener(new ValueEventListener() {
                                     @Override
-                                    public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
-                                        progressDialog.dismiss();
-                                        Toast.makeText(getApplicationContext(), "Download successful!", Toast.LENGTH_SHORT).show();
+                                    public void onDataChange(DataSnapshot dataSnapshot) {
+                                        image_url = dataSnapshot.child(post_key).child("Image_Url").getValue().toString();
+                                        course_code = dataSnapshot.child(post_key).child("Course_Code").getValue().toString();
+
+                                        progressDialog = new ProgressDialog(Dashboard.this);
+                                        progressDialog.setIndeterminate(true);
+                                        progressDialog.setMessage("Downloading picture...");
+                                        progressDialog.setCancelable(false);
+                                        progressDialog.show();
+
+                                        FirebaseStorage storage = FirebaseStorage.getInstance();
+                                        StorageReference storageRef = storage.getReferenceFromUrl(image_url);
+
+                                        File storagePath = new File(Environment.getExternalStorageDirectory(), "Paper Pass");
+
+                                        if (!storagePath.exists()) {
+                                            storagePath.mkdirs();
+                                        }
+
+                                        final File myFile = new File(storagePath, course_code + "_" + count + ".png");
+                                        count++;
+
+                                        storageRef.getFile(myFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
+                                            @Override
+                                            public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
+                                                progressDialog.dismiss();
+                                                alertDialog.dismiss();
+                                                Toast.makeText(getApplicationContext(), "Download successful!", Toast.LENGTH_SHORT).show();
+                                            }
+                                        }).addOnFailureListener(new OnFailureListener() {
+                                            @Override
+                                            public void onFailure(@NonNull Exception exception) {
+                                                progressDialog.dismiss();
+                                                alertDialog.dismiss();
+                                                Toast.makeText(getApplicationContext(), "Download failed!", Toast.LENGTH_SHORT).show();
+                                            }
+                                        });
                                     }
-                                }).addOnFailureListener(new OnFailureListener() {
+
                                     @Override
-                                    public void onFailure(@NonNull Exception exception) {
-                                        progressDialog.dismiss();
-                                        Toast.makeText(getApplicationContext(), "Download failed!", Toast.LENGTH_SHORT).show();
+                                    public void onCancelled(DatabaseError databaseError) {
+//                        Do nothing!
                                     }
                                 });
                             }
+                        });
 
+                        Button report_button = (Button) dialogView.findViewById(R.id.post_report);
+                        report_button.setOnClickListener(new View.OnClickListener() {
                             @Override
-                            public void onCancelled(DatabaseError databaseError) {
-//                        Do nothing!
+                            public void onClick(View v) {
+                                // Code for adding an entry in the reported database
+                                mDatabase.addValueEventListener(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(DataSnapshot dataSnapshot) {
+                                        image_url = dataSnapshot.child(post_key).child("Image_Url").getValue().toString();
+                                        image_uuid = dataSnapshot.child(post_key).child("Image_Id").getValue().toString();
+                                        user_fcm = FirebaseInstanceId.getInstance().getToken();
+
+                                        rDatabase.child(post_key).child("Image_Url").setValue(image_url);
+                                        rDatabase.child(post_key).child("Image_UUId").setValue(image_uuid);
+                                        rDatabase.child(post_key).child("Image_Id").setValue(post_key);
+                                        rDatabase.child(post_key).child("User_FCM").setValue(user_fcm);
+
+                                        alertDialog.dismiss();
+                                        Toast.makeText(getApplicationContext(), "The post has been reported!", Toast.LENGTH_SHORT).show();
+                                    }
+
+                                    @Override
+                                    public void onCancelled(DatabaseError databaseError) {
+                                        alertDialog.dismiss();
+                                        Toast.makeText(getApplicationContext(), "Error. Please try again later!", Toast.LENGTH_SHORT).show();
+                                    }
+                                });
                             }
                         });
+
+                        return false;
                     }
                 });
             }
@@ -247,7 +300,7 @@ public class Dashboard extends AppCompatActivity {
 
             // Setting up the custom input dialog box
             LayoutInflater li = LayoutInflater.from(thisContext);
-            View dialogView = li.inflate(R.layout.user_input_dialog, null);
+            View dialogView = li.inflate(R.layout.upload_coursecode, null);
             AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(thisContext);
             alertDialogBuilder.setTitle("Paper Details");
             alertDialogBuilder.setView(dialogView);
@@ -334,7 +387,7 @@ public class Dashboard extends AppCompatActivity {
 
             // Setting up the custom input dialog box
             LayoutInflater li = LayoutInflater.from(thisContext);
-            View dialogView = li.inflate(R.layout.user_input_dialog, null);
+            View dialogView = li.inflate(R.layout.upload_coursecode, null);
             AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(thisContext);
             alertDialogBuilder.setTitle("Paper Details");
             alertDialogBuilder.setView(dialogView);
