@@ -23,7 +23,7 @@ public class FCMService extends FirebaseMessagingService {
         NotificationCompat.Builder nc_builder = new NotificationCompat.Builder(this)
                 .setSmallIcon(R.drawable.app_logo_white)
                 .setColor(getResources().getColor(R.color.colorPrimary))
-                .setContentTitle(remoteMessage.getNotification().getTitle())
+                .setContentTitle((getResources().getString(R.string.app_name)))
                 .setStyle(new NotificationCompat.BigTextStyle().bigText(remoteMessage.getNotification().getBody()))
                 .setAutoCancel(true)
                 .setSound(soundUri);

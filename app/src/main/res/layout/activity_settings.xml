@@ -59,7 +59,8 @@
         <Button
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="CONTACT US" />
+            android:onClick="sendFeedback"
+            android:text="SEND FEEDBACK" />
 
         <android.support.v7.widget.AppCompatButton
             android:id="@+id/btn_login"

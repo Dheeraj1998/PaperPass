@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical"
+    android:padding="10dp">
+
+    <EditText
+        android:id="@+id/feedback_data"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:autoLink="all"
+        android:gravity="top|start"
+        android:hint="Say hello to us :)"
+        android:inputType="textMultiLine|textCapSentences"
+        android:lines="5"
+        android:maxLines="10"
+        android:minLines="1"
+        android:scrollbars="none"
+        android:textColor="@android:color/black"
+        android:textColorHint="@android:color/darker_gray" />
+
+</LinearLayout>

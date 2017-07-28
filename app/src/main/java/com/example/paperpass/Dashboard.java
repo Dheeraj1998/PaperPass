@@ -54,7 +54,7 @@ public class Dashboard extends AppCompatActivity {
     private static StorageReference mStorage;
     final Context thisContext = this;
     FirebaseAuth mAuth;
-    String Course_Code, user_name, image_url, course_code, image_id, image_uuid, user_fcm;
+    String Course_Code, user_name, image_url, course_code, image_uuid, user_fcm;
     int count = 0;
     ProgressDialog progressDialog;
     private RecyclerView qp_list;
